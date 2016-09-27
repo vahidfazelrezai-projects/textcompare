@@ -25,11 +25,13 @@ class Metric:
         d = float(self.mod_fn(d, words1, words2))
         return d
 
-# Numerator functions
+# Numerator and denominator functions
 def diff_fn(freq1, freq2):
     return abs(freq1 - freq2)
 
-# Denominator functions
+def diff_squared_fn(freq1, freq2):
+    return (freq1 - freq2)**2
+
 def sum_fn(freq1, freq2):
     return freq1 + freq2
 
@@ -47,8 +49,18 @@ def divide_sum_fn(d, words1, words2):
         total += words1[word] + words2[word]
     return d / total
 
+def sqrt_fn(d, words1, words2):
+    return d**0.5
+
+def jaccard_mod_fn(d, words1, words2):
+    noncommon_words = (len(words1.keys()) - d) + (len(words2.keys()) - d)
+    all_words = len(set(words1.keys()) | set(words2.keys()))
+    return noncommon_words / all_words
+
 # Map of names to metric instances
 metrics = {
     'Canberra': Metric(diff_fn, sum_fn, identity_fn),
     'Sorenson': Metric(diff_fn, unit_fn, divide_sum_fn),
+    'Minkowski2': Metric(diff_squared_fn, unit_fn, sqrt_fn),
+    'Jaccard': Metric(unit_fn, unit_fn, jaccard_mod_fn),
 }
