@@ -4,9 +4,11 @@
 class TextDoc:
   def __init__(self, filepath):
     doc = open(filepath, 'r')
-    self.title = doc.readline()[:-1]
-    self.author = doc.readline()[:-1]
-    self.isbn = doc.readline()[:-1]
+    # Note: rstrip gets rid of trailing newline
+    # (either \n on Unix or \r\n on Windows)
+    self.title = doc.readline().rstrip()
+    self.author = doc.readline().rstrip()
+    self.isbn = doc.readline().rstrip()
     d = doc.readline()
     if d != ">>>>>\n" and d != ">>>>>\r\n":
       print "File not formatted correctly."
@@ -30,6 +32,7 @@ class TextDoc:
           self.frequencies[w] += 1
         else:
           self.frequencies[w] = 1
+    doc.close()      
 
   def get_frequencies(self):
     return self.frequencies
@@ -44,7 +47,7 @@ class TextDoc:
     return self.isbn
 
 # Test
-#t = TextDoc("./data/books/Corduroy.txt")
+#t = TextDoc("./data/books/Brown Bear, Brown Bear, What Do You See.txt")
 #print t.frequencies
 #print t.get_author()
 #print t.get_title()
