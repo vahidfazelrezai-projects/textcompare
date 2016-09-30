@@ -54,7 +54,7 @@ def compare_files(directory_name):
   # Add the TF-IDF (Term Frequency Inverse Document Frequency) metric
   metric.metrics['TF-IDF'] = metric.Metric(metric.mult_fn, metric.unit_fn, metric.divide_by_magnitudes_fn, idf_weight_fn)
   # Add the sublinear TF-IDF metric
-  metric.metrics['Sublinear TF-IDF'] = metric.Metric(metric.log_mult_fn, metric.unit_fn, metric.divide_by_magnitudes_fn, idf_weight_fn)
+  metric.metrics['Sublinear TF-IDF'] = metric.Metric(metric.log_mult_fn, metric.unit_fn, metric.divide_by_log_magnitudes_fn, idf_weight_fn)
   # Add the TF-ITTF (Term Frequency Inverse Total Term Frequency) metric
   metric.metrics['TF-ITTF'] = metric.Metric(metric.mult_fn, metric.unit_fn, metric.divide_by_magnitudes_fn, ittf_weight_fn)
 

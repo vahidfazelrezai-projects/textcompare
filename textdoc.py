@@ -51,3 +51,20 @@ class TextDoc:
 #print t.frequencies
 #print t.get_author()
 #print t.get_title()
+
+#t1 = TextDoc("./data/books/Make Way for Ducklings.txt")
+#t2 = TextDoc("./data/books/The Story of Ferdinand.txt")
+#print t1.frequencies
+#print t2.frequencies
+#total = 0.0
+#m1 = 0.0
+#for term in t1.frequencies:
+#  m1 += t1.frequencies[term]**2
+#  if term in t2.frequencies:
+#    total += t1.frequencies[term] * t2.frequencies[term]
+#m2 = 0.0
+#for term in t2.frequencies:
+#  m2 += t2.frequencies[term]**2
+#m1 = m1**.5
+#m2 = m2**.5
+#print total/(m1*m2)
