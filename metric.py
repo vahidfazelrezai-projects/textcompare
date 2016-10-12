@@ -68,10 +68,12 @@ def jaccard_mod_fn(d, words1, words2, weight_fn):
     return noncommon_words / all_words
 
 def divide_by_magnitudes_fn(d, words1, words2, weight_fn):
-  return float(d) / ((reduce(lambda x,y: x + (weight_fn(y)*words1[y])**2, words1, 0)**.5) * (reduce(lambda x,y: x + (weight_fn(y)*words2[y])**2, words2, 0)**.5))
+  x = float(d) / ((reduce(lambda x,y: x + (weight_fn(y)*words1[y])**2, words1, 0)**.5) * (reduce(lambda x,y: x + (weight_fn(y)*words2[y])**2, words2, 0)**.5))
+  return math.acos(max(-1.0, min(x, 1.0))) # Min and max are for rounding errors, like evaluating 1.0 as 1.0000000000001, etc.
 
 def divide_by_log_magnitudes_fn(d, words1, words2, weight_fn):
-  return float(d) / ((reduce(lambda x,y: x + (weight_fn(y)*(1 + math.log(words1[y], 2)))**2, words1, 0)**.5) * (reduce(lambda x,y: x + (weight_fn(y)*(1 + math.log(words2[y], 2)))**2, words2, 0)**.5))
+  x = float(d) / ((reduce(lambda x,y: x + (weight_fn(y)*(1 + math.log(words1[y], 2)))**2, words1, 0)**.5) * (reduce(lambda x,y: x + (weight_fn(y)*(1 + math.log(words2[y], 2)))**2, words2, 0)**.5))
+  return math.acos(max(-1.0, min(x, 1.0))) # Min and max are for rounding errors, like evaluating 1.0 as 1.0000000000001, etc.
 
 # Weight functions (these typically need to be defined in the class using the
 # metrics, since they often require global knowledge of the documents).

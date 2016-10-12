@@ -11,7 +11,7 @@ class TextDoc:
     self.isbn = doc.readline().rstrip()
     d = doc.readline()
     if d != ">>>>>\n" and d != ">>>>>\r\n":
-      print "File not formatted correctly."
+      print "File ", filepath, " not formatted correctly."
 
     self.frequencies = {}
     # Read the actual content of the story.

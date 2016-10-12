@@ -42,6 +42,8 @@ def get_ittf_map(textdocs):
 def compare_files(directory_name):
   textdocs = []
   for filename in os.listdir(directory_name):
+    if filename == ".DS_Store":
+      continue
     textdocs.append(TextDoc(os.path.join(directory_name, filename)))
   idf_map = get_idf_map(textdocs)
   ittf_map = get_ittf_map(textdocs)
@@ -70,7 +72,14 @@ def compare_files(directory_name):
       print
 
 if __name__ == "__main__":
-  if len(sys.argv) != 2:
-    print "Incorrect usage: must be called with exactly one command-line argument (the directory name). Exiting."
-  else:
+  default_filepath = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])
+
+  if len(sys.argv) == 1:
+    print "No arguments were provided. Using default path of: {0}\n".format(default_filepath)
+  elif len(sys.argv) > 2:
+    print "Incorrect usage. Must specify 1 or 0 arguments. If 1 argument is specified, that is used as the filepath for finding the text files. Otherwise, {0} is used".format(default_filepath)
+
+  if len(sys.argv) == 2:
     compare_files(sys.argv[1])
+  else:
+    compare_files(default_filepath)
