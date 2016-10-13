@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+  <title>TextCompare</title>
+
+  <style type="text/css">
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+    #meta {
+      padding: 5px;
+      width: 100vw;
+      height: 5vh;
+      box-sizing: border-box;
+      background-color: lightgray;
+    }
+    #mynetwork {
+      width: 100vw;
+      height: 95vh;
+      border: 1px solid black;
+    }
+  </style>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <script type="text/javascript">
+  $(document).ready(function () {
+    var container = document.getElementById('mynetwork');
+    var options = {
+      interaction: {
+        hover: true
+      },
+      nodes: {
+        shape: 'dot',
+        scaling: {
+          label: {
+            min: 10,
+            max: 15
+          }
+        }
+      },
+      edges: {
+        scaling: {
+          enabled: true,
+          min: 1,
+          max: 10,
+          customScalingFunction: function (min,max,total,value) {
+            return (value - min) / (max - min);
+          }
+        },
+        color: {
+          color: '#FFA69E',
+          hover: '#6494AA'
+        }
+      }
+    };
+
+    $('#metric-selector').append($("<option />").val("None").text("None"));
+
+    $.get('/metrics', function (data) {
+      $.each(data, function (item) {
+        $('#metric-selector').append($("<option />").val(data[item]).text(data[item]));
+      });
+    });
+
+    var update = function () {
+      var metric = $('#metric-selector').val();
+      var count = $('#count-selector').val();
+      $.get('/data?metric=' + metric + '&count=' + count, function (data) {
+        network = new vis.Network(container, data, options);
+      });
+    }
+
+    $('#metric-selector').change(update);
+    $('#count-selector').change(update);
+
+    // initial load
+    $.get('/data', function (data) {
+      network = new vis.Network(container, data, options);
+    });
+  });
+  </script>
+</head>
+<body>
+    <div id="meta">
+      Use metric:
+      <select id="metric-selector"></select>
+      &nbsp;
+      Number of books:
+      <select id="count-selector">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5" selected="selected">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+    </div>
+    <div id="mynetwork"></div>
+</body>
+</html>
