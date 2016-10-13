@@ -4,7 +4,7 @@ import compare
 from flask import Flask, jsonify, request
 app = Flask(__name__)
 
-filepath = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])
+filepath = "./data/books"
 all_textdocs, metric = compare.initialize(filepath)
 
 @app.route('/')
