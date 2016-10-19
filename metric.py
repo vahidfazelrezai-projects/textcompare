@@ -1,5 +1,8 @@
 import math
 
+tversky_alpha = 0.0
+tversky_beta = 1.0
+
 class Metric:
     # Function signatures for arguments are as follows:
     # num_fn(freq1, freq2) # numerator
@@ -48,6 +51,9 @@ def mult_fn(freq1, freq2):
 def log_mult_fn(freq1, freq2):
   return (1 + math.log(freq1, 2)) * (1 + math.log(freq2, 2))
 
+def freq2_fn(freq1, freq2):
+  return freq2
+
 # Modifier functions
 def identity_fn(d, words1, words2, weight_fn):
     return d
@@ -75,6 +81,24 @@ def divide_by_log_magnitudes_fn(d, words1, words2, weight_fn):
   x = float(d) / ((reduce(lambda x,y: x + (weight_fn(y)*(1 + math.log(words1[y], 2)))**2, words1, 0)**.5) * (reduce(lambda x,y: x + (weight_fn(y)*(1 + math.log(words2[y], 2)))**2, words2, 0)**.5))
   return math.acos(max(-1.0, min(x, 1.0))) # Min and max are for rounding errors, like evaluating 1.0 as 1.0000000000001, etc.
 
+def tversky_divide_fn(d, words1, words2, weight_fn):
+  s1 = set(words1.keys())
+  s2 = set(words2.keys())
+  return 1 - d/(d + tversky_alpha*len(s1 - s2) + tversky_beta*(len(s2 - s1)))
+
+# Number of new words that would need to be learned to read book2 after reading book1.
+def num_new_words_fn(d, words1, words2, weight_fn):
+  s1 = set(words1.keys())
+  s2 = set(words2.keys())
+  return len(s2 - s1)
+
+# Number of occurrences of new words when reading book2 after book1.
+# To be used with freq2_fn as numerator function.
+def num_new_occurrences_fn(d, words1, words2, weight_fn):
+  # d represents the number of occurrences of all common words in book2.
+  # So we just need to subtract this from the total number of words in book2.
+  return (sum(words2[w] for w in words2) - d)
+
 # Weight functions (these typically need to be defined in the class using the
 # metrics, since they often require global knowledge of the documents).
 def default_weight_fn(word):
@@ -88,4 +112,10 @@ metrics = {
     'Jaccard': Metric(unit_fn, unit_fn, jaccard_mod_fn, default_weight_fn),
     'TF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, default_weight_fn),
     'Sublinear TF': Metric(log_mult_fn, unit_fn, divide_by_log_magnitudes_fn, default_weight_fn),
+}
+
+asymmetric_metrics = {
+  'Tversky index': Metric(unit_fn, unit_fn, tversky_divide_fn, default_weight_fn),
+  'New Words': Metric(unit_fn, unit_fn, num_new_words_fn, default_weight_fn),
+  'New Occurrences': Metric(freq2_fn, unit_fn, num_new_occurrences_fn, default_weight_fn),
 }
