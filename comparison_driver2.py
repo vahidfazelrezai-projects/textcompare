@@ -69,6 +69,17 @@ def compare_files(directory_name):
   # Add the TF-ITTF (Term Frequency Inverse Total Term Frequency) metric
   metric.metrics['TF-ITTF'] = metric.Metric(metric.mult_fn, metric.unit_fn, metric.divide_by_magnitudes_fn, ittf_weight_fn)
 
+  new_words_max = float('-inf')
+  new_occurrences_max = float('-inf')
+  for i in xrange(len(textdocs)):
+    for j in xrange(len(textdocs)):
+      if i == j:
+        continue
+      doc1 = textdocs[i]
+      doc2 = textdocs[j]
+      new_words_max = max(new_words_max, metric.asymmetric_metrics['New Words'].distance(doc1, doc2))
+      new_occurrences_max = max(new_occurrences_max, metric.asymmetric_metrics['New Occurrences'].distance(doc1, doc2))
+
   low_scores = {}
   low_pairs = {}
   high_scores = {}
@@ -78,6 +89,11 @@ def compare_files(directory_name):
     low_pairs[m] = "INITIAL VALUE"
     high_scores[m] = float("-inf")
     high_pairs[m] = "INITIAL VALUE"
+
+  low_scores['combined metric'] = float("inf")
+  low_pairs['combined metric'] = "INITIAL VALUE"
+  high_scores['combined metric'] = float("-inf")
+  high_pairs['combined metric'] = "INITIAL VALUE"
 
   # Iterate over textdocs pairwise and compare them.
   for i in xrange(len(textdocs)):
@@ -96,6 +112,12 @@ def compare_files(directory_name):
       for m in metric.asymmetric_metrics:
         # perform logic for comparing doc1 and doc2
         d = metric.asymmetric_metrics[m].distance(doc1, doc2)
+        if m == 'New Words':
+          # Normalize
+          d = d / new_words_max
+        elif m == 'New Occurrences':
+          # Normalize
+          d = d / new_occurrences_max
         print "Using metric ", m, ":", d
         if d == -1:
           # Ignore books with no words in common.
@@ -106,12 +128,30 @@ def compare_files(directory_name):
         if d > high_scores[m]:
           high_scores[m] = d
           high_pairs[m] = "{0} and {1}".format(doc1.title, doc2.title)
+      d1 = metric.asymmetric_metrics['Tversky index'].distance(doc1, doc2)
+      d2 = metric.asymmetric_metrics['New Words'].distance(doc1, doc2)/new_words_max
+      d3 = metric.asymmetric_metrics['New Occurrences'].distance(doc1, doc2)/new_occurrences_max
+      combined_score = -1
+      if d1 >= 0 and d2 >= 0 and d3 >= 0:
+        # No negative terms that occur when there's no overlap
+        combined_score = d1 + d2 + d3
+        if combined_score < low_scores['combined metric']:
+          low_scores['combined metric'] = combined_score
+          low_pairs['combined metric'] = "{0} and {1}".format(doc1.title, doc2.title)
+        if combined_score > high_scores['combined metric']:
+          high_scores['combined metric'] = combined_score
+          high_pairs['combined metric'] = "{0} and {1}".format(doc1.title, doc2.title)
+
+      print "Using metric combined metric ", combined_score
       print "--------------------------------------------------------------------------------\n"
   print "Total Results Per Metric:"
   for m in metric.asymmetric_metrics:
     print m
     print "Low:  {0} ({1})".format(low_scores[m], low_pairs[m])
     print "High: {0} ({1})\n".format(high_scores[m], high_pairs[m])
+  print "combined metric"
+  print "Low:  {0} ({1})".format(low_scores['combined metric'], low_pairs['combined metric'])
+  print "High: {0} ({1})\n".format(high_scores['combined metric'], high_pairs['combined metric'])
 
 if __name__ == "__main__":
   default_filepath = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])

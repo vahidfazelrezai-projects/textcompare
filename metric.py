@@ -1,7 +1,7 @@
 import math
 
 tversky_alpha = 0.0
-tversky_beta = 1.0
+tversky_beta = 0.1
 
 class Metric:
     # Function signatures for arguments are as follows:
