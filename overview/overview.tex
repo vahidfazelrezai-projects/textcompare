@@ -1,0 +1,56 @@
+\documentclass[10pt]{paper}
+\usepackage{amsmath,graphicx}
+\usepackage[margin=1in]{geometry}
+\pagestyle{empty}
+\pagenumbering{gobble}
+\title{TextCompare}
+\author{Prof. Tony Eng, Antonio Rivera, Vahid Fazel-Rezai}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Learning a new language can be daunting because it can be hard to know where to start. There are lots of words in a given language, and one has to somehow organize them into some order for learning, basic words first and slowly become more advanced. One way to acquire new words is to read books or watch movies in the language. We propose a system for deciding, for example, which books to read and in which order. Given a set of text blobs (e.g. book or movie transcripts), we construct a graph with edges indicating jump in skill level or perhaps other metrics. Using the graph, we can find a path from the current skill level (represented as a blob of words or as starting nodes in the graph) to the desired set of words in which each step has a limit on the number of new words. An additional benefit of the system is that it can potentially even discern which words are more basic or more advanced. The key problems to solve in order to create such a system is to (1) find a good metric for the edge weights and (2) easily make apply the graph to its use case.
+
+\section{Data}
+
+We have data of several types:
+\begin{itemize}
+  \item Control documents with specific properites (e.g. single repeated word).
+  \item Children's books.
+  \item Nursery rhymes.
+\end{itemize}
+
+\section{Similarity and Distance Metrics}
+
+Types of words
+\begin{align*}
+  a &= \text{Number of unique words in common} \\
+  b &= \text{Number of unique words only in A} \\
+  c &= \text{Number of unique words only in B}
+\end{align*}
+
+Distance:
+\begin{itemize}
+  \item Vocabulary (number of new words)
+  \item 
+\end{itemize}
+
+Similarity:
+\begin{itemize}
+  \item Vocabulary (number of overlapping words)
+\end{itemize}
+
+
+\section{Path Finding}
+
+Clustering
+
+Finding scalar score for each node that minimizes error
+
+
+\end{document}
+
