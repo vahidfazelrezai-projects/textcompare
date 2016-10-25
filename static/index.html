@@ -29,6 +29,9 @@
   <script type="text/javascript">
   $(document).ready(function () {
     var container = document.getElementById('mynetwork');
+    var threshold = 0;
+    var restrict = false;
+    var restrictId = 0;
     var options = {
       interaction: {
         hover: true
@@ -46,7 +49,6 @@
       },
       edges: {
         scaling: {
-          enabled: true,
           min: 1,
           max: 10,
           customScalingFunction: function (min,max,total,value) {
@@ -71,18 +73,46 @@
     var update = function () {
       var metric = $('#metric-selector').val();
       var count = $('#count-selector').val();
+      var restrictId = $('#from-selector').val();
+      console.log(restrictId);
       $.get('/data?metric=' + metric + '&count=' + count, function (data) {
+        data.edges = data.edges.filter(function (edge) {
+          return (edge.value > threshold);
+        });
+        if (restrict) {
+          data.edges = data.edges.filter(function (edge) {
+            console.log(edge.from);
+            console.log(restrictId);
+            return ((edge.to == restrictId) || (edge.from == restrictId));
+          });
+        }
+        $('#from-selector').find('option').remove();
+        $('#from-selector').append($("<option />").val(-1).text('None'));
+        data.nodes.forEach(function (node) {
+          $('#from-selector').append($("<option />").val(node.id).text(node.label));
+        });
+        console.log(data);
         network = new vis.Network(container, data, options);
       });
     }
 
     $('#metric-selector').change(update);
     $('#count-selector').change(update);
+    $('#threshold-go').on('click', function () {
+      threshold = parseFloat($('#threshold-selector').val());
+      update();
+    });
+    $('#from-go').on('click', function () {
+      if ($('#metric-selector').val() == -1) {
+        restrict = false;
+      } else {
+        restrict = true;
+      }
+      update();
+    });
 
     // initial load
-    $.get('/data', function (data) {
-      network = new vis.Network(container, data, options);
-    });
+    update();
   });
   </script>
 </head>
@@ -103,7 +133,27 @@
         <option value="8">8</option>
         <option value="9">9</option>
         <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
       </select>
+      &nbsp;
+      Edge threshold:
+      <input id="threshold-selector"></input>
+      <button id="threshold-go">Go</button>
+      &nbsp;
+      From:
+      <select id="from-selector">
+        <option value="-1">None</option>
+      </select>
+      <button id="from-go">Go</button>
     </div>
     <div id="mynetwork"></div>
 </body>
