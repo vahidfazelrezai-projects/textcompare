@@ -112,6 +112,11 @@ def compare_files(directory_name):
       for m in metric.asymmetric_metrics:
         # perform logic for comparing doc1 and doc2
         d = metric.asymmetric_metrics[m].distance(doc1, doc2)
+        if d == -1:
+          # Ignore books with no words in common.
+          print "Using metric ", m, ":", d
+          continue
+
         if m == 'New Words':
           # Normalize
           d = d / new_words_max
@@ -119,9 +124,6 @@ def compare_files(directory_name):
           # Normalize
           d = d / new_occurrences_max
         print "Using metric ", m, ":", d
-        if d == -1:
-          # Ignore books with no words in common.
-          continue
         if d < low_scores[m]:
           low_scores[m] = d
           low_pairs[m] = "{0} and {1}".format(doc1.title, doc2.title)
@@ -134,7 +136,7 @@ def compare_files(directory_name):
       combined_score = -1
       if d1 >= 0 and d2 >= 0 and d3 >= 0:
         # No negative terms that occur when there's no overlap
-        combined_score = d1 + d2 + d3
+        combined_score = (d1 + d2 + d3)/3.0
         if combined_score < low_scores['combined metric']:
           low_scores['combined metric'] = combined_score
           low_pairs['combined metric'] = "{0} and {1}".format(doc1.title, doc2.title)

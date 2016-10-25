@@ -9,8 +9,8 @@ class TextDoc:
     self.title = doc.readline().rstrip()
     self.author = doc.readline().rstrip()
     self.isbn = doc.readline().rstrip()
-    d = doc.readline()
-    if d != ">>>>>\n" and d != ">>>>>\r\n":
+    d = doc.readline().strip()
+    if d != ">>>>>":
       print "File ", filepath, " not formatted correctly."
 
     self.frequencies = {}
