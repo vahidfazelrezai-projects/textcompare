@@ -11,6 +11,20 @@ import metric
 import os
 from textdoc import TextDoc
 
+training_set_1_loc = "/Users/{0}/Dropbox (MIT)/children's books/training_set/".format(os.environ['USER'])
+training_set_2_loc = "/Users/{0}/Dropbox (MIT)/children's books/training_set2/".format(os.environ['USER'])
+training_set_3_loc = "/Users/{0}/Dropbox (MIT)/children's books/training_set3/".format(os.environ['USER'])
+
+# Use this to determine which training set we'll use
+training_set_num = 3
+
+if training_set_num == 1:
+  training_set_loc = training_set_1_loc
+elif training_set_num == 2:
+  training_set_loc = training_set_2_loc
+else:
+  training_set_loc = training_set_3_loc
+
 def get_documents(directory_name):
   textdocs = []
   for filename in os.listdir(directory_name):
@@ -27,6 +41,14 @@ def get_range(low, high):
     val += 0.1
   return s
 
+def get_fine_range(low, high):
+  val = low
+  s = []
+  while val <= high:
+    s.append(val)
+    val += 0.01
+  return s
+
 if __name__ == '__main__':
   weights = {
     'Tversky index' : get_range(-1, 1),
@@ -35,7 +57,7 @@ if __name__ == '__main__':
     'alpha' : get_range(0, 1),
     'beta' : get_range(0, 1),
   }
-  documents = get_documents("/Users/{0}/Dropbox (MIT)/children's books/training_set/".format(os.environ['USER']))
+  documents = get_documents(training_set_loc)
 
   print "Checkpoint 1"
   alpha_beta_to_tversky_scores = {}
@@ -99,17 +121,55 @@ if __name__ == '__main__':
                 title2 = documents[j].get_title()
                 score = w_tversky * alpha_beta_to_tversky_scores[(alpha, beta)][(title1, title2)] + w_new_words*metric_to_scores['New Words'][(title1, title2)] + w_new_occurrences*metric_to_scores['New Occurrences'][(title1, title2)]
                 #scores[(alpha, beta, w_tversky, w_new_words, w_new_occurrences, title1, title2)] = score
-                if title1 == "Hug" and title2 == "Wolstencroft the Bear":
-                  total_score += score
-                elif title1 == "Corduroy" and title2 == "Wolstencroft the Bear":
-                  total_score -= score
-                elif title1 == "Faster! Faster!" and title2 == "Hug":
-                  total_score -= score
-                elif title1 == "Corduroy" and title2 == "Brown Bear Brown Bear, What Do You See?":
-                  total_score -= score
-                elif title1 == "Brown Bear Brown Bear, What Do You See?" and title2 == "Wolstencroft the Bear":
-                  total_score += score
-                  #max_hug_to_wolstencroft = "alpha: {0}, beta: {1}, tversky: {2}, new words: {3}, new occurrences: {4}".format(alpha, beta, w_tversky, w_new_words, w_new_occurrences)
+                if training_set_num == 1:
+                  if title1 == "Hug" and title2 == "Wolstencroft the Bear":
+                    total_score += score
+                  elif title1 == "Corduroy" and title2 == "Wolstencroft the Bear":
+                    total_score -= score
+                  elif title1 == "Faster! Faster!" and title2 == "Hug":
+                    total_score -= score
+                  elif title1 == "Corduroy" and title2 == "Brown Bear Brown Bear, What Do You See?":
+                    total_score -= score
+                  elif title1 == "Brown Bear Brown Bear, What Do You See?" and title2 == "Wolstencroft the Bear":
+                    total_score += score
+                    #max_hug_to_wolstencroft = "alpha: {0}, beta: {1}, tversky: {2}, new words: {3}, new occurrences: {4}".format(alpha, beta, w_tversky, w_new_words, w_new_occurrences)
+                elif training_set_num == 2:
+                  # Training set 2
+                  if title1 == "If You Give A Moose A Muffin" and title2 == "If you Give A Mouse A Cookie":
+                    total_score -= score
+                  elif title1 == "If you Give A Mouse A Cookie" and title2 == "If You Give A Moose A Muffin":
+                    total_score -= score
+                  elif title1 == "King Daddy" and title2 == "If You Give A Moose A Muffin":
+                    total_score += score
+                  elif title1 == "llama llama zippity-zoom" and title2 == "If You Give A Moose A Muffin":
+                    total_score += score
+                  elif title1 == "King Daddy" and title2 == "llama llama zippity-zoom":
+                    total_score -= score
+                  elif title1 == "llama llama zippity-zoom" and title2 == "King Daddy":
+                    total_score -= score
+                  elif title1 == "The Berenstain Bears Inside outside upside down" and title2 == "If You Give A Moose A Muffin":
+                    total_score += score
+                  elif title1 == "The Berenstain Bears Inside outside upside down" and title2 == "If you Give A Mouse A Cookie":
+                    total_score += score
+                else:
+                  if title1 == "King Daddy" and title2 == "If You Give A Moose A Muffin":
+                    total_score += score
+                  elif title1 == "King Daddy" and title2 == "Wolstencroft the Bear":
+                    total_score += score
+                  elif title1 ==  "Wolstencroft the Bear" and title2 == "King Daddy":
+                    total_score -= score
+                  #elif title1 == "Knuffle Bunny" and title2 == "Brown Bear Brown Bear, What Do You See?":
+                  #  total_score -= score
+                  elif title1 == "If You Give A Moose A Muffin" and title2 == "Wolstencroft the Bear":
+                    total_score += score
+                  #elif title1 == "Wolstencroft the Bear" and title2 == "If You Give A Moose A Muffin":
+                  #  total_score += score
+                  elif title1 == "Wolstencroft the Bear" and title2 == "King Daddy":
+                    total_score -= score
+                  elif title1 == "If You Give A Moose A Muffin" and title2 == "King Daddy":
+                    total_score -= score
+            if abs(total_score - 4.99636360535) < 0.0001:
+              print '.'
             if total_score > max_score:
               max_combination = "alpha: {0}, beta: {1}, tversky: {2}, new words: {3}, new occurrences: {4}".format(alpha, beta, w_tversky, w_new_words, w_new_occurrences)
               max_score = total_score

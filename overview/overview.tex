@@ -28,10 +28,28 @@ We have data of several types:
 
 Types of words
 \begin{align*}
-  a &= \text{Number of unique words in common} \\
-  b &= \text{Number of unique words only in A} \\
-  c &= \text{Number of unique words only in B}
+  a &= \text{Number of unique words only in A} \\
+  b &= \text{Number of unique words only in B} \\
+  c &= \text{Number of unique words in common}
 \end{align*}
+
+The metrics used to compare two texts can be split into three groups:
+\begin{enumerate}
+	\item Metrics that use only $c$ (i.e. overlap comparison). These include Jaccard index, Canberra, Sorenson, and Minkowski2. 
+	\item Metrics that use $a$, $b$, and $c$. Examples of these are TF, TF-IDF, and their variants, such as sublinear TF-IDF and TF-ITTF.
+	\item Asymmetric metrics. The main one used is Tversky Index, but one could also consider simpler metrics such as number of new words or number of new occurrences.
+\end{enumerate}
+
+TF-IDF and Variants:
+
+These metrics measure the angle between word vector representations of texts. The difference between the variants is how those word vectors are determined. The simplest form is TF (Term Frequency). This simply constructs word vectors where the $i$th value in the vector denotes the frequency of term $i$ for that particular text. Given two texts A and B with word vectors X and Y respectively, we then simply calculate the angle between the texts:
+$$\arccos \left( \frac{\ X \cdot Y }{ \lVert X \rVert \lVert Y \rVert} \right)$$
+
+Asymmetric Metrics:
+
+Tversky index is defined, for sets of words $X$ and $Y$, as:
+$$\frac{|X \cap Y|}{|X \cap Y| + \alpha |X - Y| + \beta |Y - X|}$$
+with $\alpha, \beta \geq 0$. It should be noted that if $\alpha = \beta$, then the metric is symmetric. For our purposes, I think that setting $\alpha = 0$ will give us the metric we want. When considering whether a child can read book Y after reading book X, what we care about is how many new words there are in Y. Thus, letting $\alpha = 0$ and $\beta \neq 0$ reflects this. This intuition has been reflected when attempting to maximize/minimize particular distances in a test set of books.\\
 
 Distance:
 \begin{itemize}
