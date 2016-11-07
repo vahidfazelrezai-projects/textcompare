@@ -11,6 +11,9 @@ import metric
 import os
 from textdoc import TextDoc
 
+# Whether we should use 2*average to normalize "new words" and "new occurrences" metrics.
+normalize_by_avg = False
+
 training_set_1_loc = "/Users/{0}/Dropbox (MIT)/children's books/training_set/".format(os.environ['USER'])
 training_set_2_loc = "/Users/{0}/Dropbox (MIT)/children's books/training_set2/".format(os.environ['USER'])
 training_set_3_loc = "/Users/{0}/Dropbox (MIT)/children's books/training_set3/".format(os.environ['USER'])
@@ -49,6 +52,14 @@ def get_fine_range(low, high):
     val += 0.01
   return s
 
+def get_coarse_range(low, high):
+  val = low
+  s = []
+  while val <= high:
+    s.append(val)
+    val += 10.0
+  return s
+
 if __name__ == '__main__':
   weights = {
     'Tversky index' : get_range(-1, 1),
@@ -78,6 +89,8 @@ if __name__ == '__main__':
   print "Checkpoint 2"
   metric_to_scores = {}
   max_scores = {'New Words': float('-inf'), 'New Occurrences': float('-inf')}
+  avg_scores = {'New Words': 0.0, 'New Occurrences': 0.0}
+  num_nonnegative_scores = {'New Words': 0, 'New Occurrences': 0}
   # compute scores for the rest of the metrics
   for m in metric.asymmetric_metrics:
     if m == 'Tversky index':
@@ -95,11 +108,23 @@ if __name__ == '__main__':
         metric_to_scores[m][(doc1.get_title(), doc2.get_title())] = score
         if score > max_scores[m]:
           max_scores[m] = score
+        if abs(score + 1.0) > 0.000000001:
+          # Score wasn't -1
+          avg_scores[m] += score
+          num_nonnegative_scores[m] += 1
+
+  for m in metric.asymmetric_metrics:
+    if m == 'Tversky index':
+      continue
+    avg_scores[m] = (2.0 * avg_scores[m])/num_nonnegative_scores[m] if num_nonnegative_scores[m] != 0 else 1
 
   # Normalize new words and new occurrences by dividing by the largest value
   for m in metric_to_scores:
     for key in metric_to_scores[m]:
-      metric_to_scores[m][key] = float(metric_to_scores[m][key]) / max_scores[m]
+      if normalize_by_avg:
+        metric_to_scores[m][key] = float(metric_to_scores[m][key]) / avg_scores[m]
+      else:
+        metric_to_scores[m][key] = float(metric_to_scores[m][key]) / max_scores[m]
 
   print "Checkpoint 3"
   max_combination = ''

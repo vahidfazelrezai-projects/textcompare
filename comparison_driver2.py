@@ -4,6 +4,8 @@ import sys
 from textdoc import TextDoc
 import metric
 
+normalize_by_avg = False
+
 def print_vocabulary_sizes(directory_name):
   textdocs = []
   for filename in os.listdir(directory_name):
@@ -70,15 +72,33 @@ def compare_files(directory_name):
   metric.metrics['TF-ITTF'] = metric.Metric(metric.mult_fn, metric.unit_fn, metric.divide_by_magnitudes_fn, ittf_weight_fn)
 
   new_words_max = float('-inf')
+  new_words_avg = 0.0
   new_occurrences_max = float('-inf')
+  new_occurrences_avg = 0.0
+  num_nonnegative_comparisons = 0
   for i in xrange(len(textdocs)):
     for j in xrange(len(textdocs)):
       if i == j:
         continue
       doc1 = textdocs[i]
       doc2 = textdocs[j]
-      new_words_max = max(new_words_max, metric.asymmetric_metrics['New Words'].distance(doc1, doc2))
-      new_occurrences_max = max(new_occurrences_max, metric.asymmetric_metrics['New Occurrences'].distance(doc1, doc2))
+
+      nw_dist = metric.asymmetric_metrics['New Words'].distance(doc1, doc2)
+      new_words_max = max(new_words_max, nw_dist)
+
+      no_dist = metric.asymmetric_metrics['New Occurrences'].distance(doc1, doc2)
+      new_occurrences_max = max(new_occurrences_max, no_dist)
+
+      if abs(nw_dist + 1.0) > 0.000000001:
+        # Score wasn't -1
+        new_words_avg += nw_dist
+        new_occurrences_avg += no_dist
+        num_nonnegative_comparisons += 1
+  # NOTE: in the unlikely case where all comparisons return a score of -1, just
+  # set the averages to 1, so they don't affect the scores.
+  new_words_avg = (2.0 * new_words_avg)/num_nonnegative_comparisons if num_nonnegative_comparisons != 0 else 1
+  new_occurrences_avg = (2.0 * new_occurrences_avg)/num_nonnegative_comparisons if num_nonnegative_comparisons != 0 else 1
+
 
   low_scores = {}
   low_pairs = {}
@@ -119,10 +139,16 @@ def compare_files(directory_name):
 
         if m == 'New Words':
           # Normalize
-          d = d / new_words_max
+          if normalize_by_avg:
+            d = d / new_words_avg
+          else:
+            d = d / new_words_max
         elif m == 'New Occurrences':
           # Normalize
-          d = d / new_occurrences_max
+          if normalize_by_avg:
+            d = d / new_occurrences_avg
+          else:
+            d = d / new_occurrences_max
         print "Using metric ", m, ":", d
         if d < low_scores[m]:
           low_scores[m] = d
