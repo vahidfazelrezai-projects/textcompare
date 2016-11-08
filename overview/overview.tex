@@ -1,4 +1,4 @@
-\documentclass[10pt]{paper}
+\documentclass[11pt]{paper}
 \usepackage{amsmath,graphicx}
 \usepackage[margin=1in]{geometry}
 \pagestyle{empty}
@@ -13,29 +13,50 @@
 
 \section{Introduction}
 
-Learning a new language can be daunting because it can be hard to know where to start. There are lots of words in a given language, and one has to somehow organize them into some order for learning, basic words first and slowly become more advanced. One way to acquire new words is to read books or watch movies in the language. We propose a system for deciding, for example, which books to read and in which order. Given a set of text blobs (e.g. book or movie transcripts), we construct a graph with edges indicating jump in skill level or perhaps other metrics. Using the graph, we can find a path from the current skill level (represented as a blob of words or as starting nodes in the graph) to the desired set of words in which each step has a limit on the number of new words. An additional benefit of the system is that it can potentially even discern which words are more basic or more advanced. The key problems to solve in order to create such a system is to (1) find a good metric for the edge weights and (2) easily make apply the graph to its use case.
+Learning a new language can be daunting because it can be hard to know where to start. There are lots of words in a given language, and one has to somehow organize them in some order to learning, first the basic words first and slowly more and more advanced words. One way to acquire new words is to read books or watch movies in the language. We propose a system hinged around comparing pairs of texts to map out a reading order for a language learner. 
+
+On a high level, our approach is to model a set of text documents (e.g. book or movie transcripts) as a complete graph with edges indicating differences in skill level, using which we can find a path from the current skill level to the desired skill level, with conditions on the number of edges and distance of each step. Start and end skill levels can be represented as a list of words and included as nodes in the graph. An extension of this system is to work on a word-by-word level, potentially discerning which words are more basic or more advanced. The three essential questions that must be answered are:
+\begin{itemize}
+  \item What properties of a piece of text are we trying to measure?
+  \item What metric(s) (i.e. formulas on document word frequencies) capture these properties?
+  \item Given all pairwise distances of a set of books, as well as a start what set of conditions 
+\end{itemize}
+In addition, prior to answering the above questions we must decide on and acquire toy data to prototype on, and after answering these questions we need to address the problem of how to make the system practical and usable.
 
 \section{Data}
 
-We have data of several types:
+We began by collecting data of the following types:
 \begin{itemize}
-  \item Control documents with specific properites (e.g. single repeated word).
+  \item Control documents with specific properites (generated manually, e.g. single repeated word).
   \item Children's books.
   \item Nursery rhymes.
 \end{itemize}
+These were chosen because they are short and simple, allowing us to reason on a low level and manually compare documents. Also, children's books are primarily used to develop language, so we can maybe incorporate subjective or anecdotal insights.
+
+\section{Document Properties}
+
+Our goal is to use comparisons between documents to infer their relative difficulties. In our case, difficulty includes two factors:
+\begin{itemize}
+  \item Size of vocabulary.
+  \item How advanced the vocabulary is.
+\end{itemize}
+The distinction between how advanced a vocabulary is is important--consider several advanced books on the same topic and another medium book on a different topic. 
 
 \section{Similarity and Distance Metrics}
 
-Types of words
+Consider two documents $X$ and $Y$. 
 \begin{align*}
   a &= \text{Number of unique words only in A} \\
   b &= \text{Number of unique words only in B} \\
-  c &= \text{Number of unique words in common}
+  c &= \text{Number of unique words in common} \\
+  a &= \text{Number of only in A} \\
+  b &= \text{Number of only in B} \\
+  c &= \text{Number of in common}
 \end{align*}
 
 The metrics used to compare two texts can be split into three groups:
 \begin{enumerate}
-	\item Metrics that use only $c$ (i.e. overlap comparison). These include Jaccard index, Canberra, Sorenson, and Minkowski2. 
+	\item Metrics that use only $c$ (i.e. overlap comparison). These include Jaccard index, Canberra, Sorenson, and Minkowski2.
 	\item Metrics that use $a$, $b$, and $c$. Examples of these are TF, TF-IDF, and their variants, such as sublinear TF-IDF and TF-ITTF.
 	\item Asymmetric metrics. The main one used is Tversky Index, but one could also consider simpler metrics such as number of new words or number of new occurrences.
 \end{enumerate}
@@ -54,7 +75,7 @@ with $\alpha, \beta \geq 0$. It should be noted that if $\alpha = \beta$, then t
 Distance:
 \begin{itemize}
   \item Vocabulary (number of new words)
-  \item 
+  \item
 \end{itemize}
 
 Similarity:
@@ -65,10 +86,23 @@ Similarity:
 
 \section{Path Finding}
 
-Clustering
+In this section we assume we are given a set of documents with one or more distance metrics that can be evaluated on each pair of documents. We model this as one or more complete graphs where nodes are documents and edges may be directed. There may even be directed cycles that we must deal with.
 
-Finding scalar score for each node that minimizes error
+Possible conditions on a path could be:
+\begin{itemize}
+  \item Minimize number of steps in path.
+  \item Minimize largest distance across all steps in path.
+  \item Maximize total number of new words.
+\end{itemize}
+
+\subsection{Ordering}
+
+In this use case, we are given a set of documents and simply need to sort the in order of least to most advanced. Mathematically, we need to find a path that hits every node.
+
+\subsection{Optimizing start to finish}
+
+In this case, there are start and end nodes included in the graph(s). (These can be documents or just lists of words treated like a document.) We wish to find the best path from start to finish for some definition of best.
+
 
 
 \end{document}
-
