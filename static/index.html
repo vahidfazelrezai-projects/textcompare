@@ -48,9 +48,10 @@
         }
       },
       edges: {
+        arrows: 'middle',
         scaling: {
-          min: 1,
-          max: 10,
+          min: .5,
+          max: 5,
           customScalingFunction: function (min,max,total,value) {
             return (value - min) / (max - min);
           }
@@ -59,6 +60,9 @@
           color: '#FFA69E',
           hover: '#6494AA'
         }
+      },
+      physics: {
+        enabled: false
       }
     };
 

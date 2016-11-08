@@ -4,7 +4,8 @@ import compare
 from flask import Flask, jsonify, request
 app = Flask(__name__)
 
-filepath = "./data/books"
+# filepath = "./data/books"
+filepath = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])
 all_textdocs, metric = compare.initialize(filepath)
 
 @app.route('/')
@@ -13,7 +14,7 @@ def index():
 
 @app.route('/metrics')
 def metrics():
-    return jsonify(metric.metrics.keys())
+    return jsonify(metric.metrics.keys() + metric.asymmetric_metrics.keys())
 
 @app.route('/data')
 def data():
@@ -38,7 +39,12 @@ def data():
 
     edges = []
     if 'metric' in request.args and request.args['metric'] != 'None':
-        m = metric.metrics[request.args['metric']]
+        if request.args['metric'] in metric.metrics:
+            m = metric.metrics[request.args['metric']]
+        elif request.args['metric'] in metric.asymmetric_metrics:
+            m = metric.asymmetric_metrics[request.args['metric']]
+        else:
+            return
         for i in xrange(len(textdocs)):
             for j in xrange(i+1, len(textdocs)):
                 doc1 = textdocs[i]
