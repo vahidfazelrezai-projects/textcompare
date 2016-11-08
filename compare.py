@@ -58,3 +58,35 @@ def initialize(directory_name):
   metric.metrics['TF-ITTF'] = metric.Metric(metric.mult_fn, metric.unit_fn, metric.divide_by_magnitudes_fn, ittf_weight_fn)
 
   return textdocs, metric
+
+def get_graph(textdocs, metric, metric_name):
+    ids = []
+    nodes = {}
+    id_map = {}
+    id_counter = 1
+    for doc in textdocs:
+        num_words = len(doc.get_frequencies().keys())
+        ids.append(id_counter)
+        nodes[id_counter] = (doc.get_title(), num_words)
+        id_map[doc] = id_counter
+        id_counter += 1
+
+    edges = {}
+    if metric_name in metric.metrics:
+        m = metric.metrics[metric_name]
+    elif metric_name in metric.asymmetric_metrics:
+        m = metric.asymmetric_metrics[metric_name]
+    else:
+        return
+    for i in xrange(len(textdocs)):
+        for j in xrange(i+1, len(textdocs)):
+            doc1 = textdocs[i]
+            doc2 = textdocs[j]
+            edges[(id_map[doc1], id_map[doc2])] = m.distance(doc1, doc2)
+            edges[(id_map[doc2], id_map[doc1])] = m.distance(doc2, doc1)
+
+    return {
+        'ids': ids,
+        'nodes': nodes,
+        'edges': edges
+    }
