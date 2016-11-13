@@ -3,8 +3,10 @@ import os
 import sys
 from textdoc import TextDoc
 import metric
+import matplotlib.pyplot as plt
 
 normalize_by_avg = False
+display_graph = True
 
 def print_vocabulary_sizes(directory_name):
   textdocs = []
@@ -99,6 +101,12 @@ def compare_files(directory_name):
   new_words_avg = (2.0 * new_words_avg)/num_nonnegative_comparisons if num_nonnegative_comparisons != 0 else 1
   new_occurrences_avg = (2.0 * new_occurrences_avg)/num_nonnegative_comparisons if num_nonnegative_comparisons != 0 else 1
 
+  tversky_values = [0 for q in xrange(num_nonnegative_comparisons)]
+  tversky_value_index = 0
+  new_words_values = [0 for q in xrange(num_nonnegative_comparisons)]
+  new_words_value_index = 0
+  new_occurrences_values = [0 for q in xrange(num_nonnegative_comparisons)]
+  new_occurrences_value_index = 0
 
   low_scores = {}
   low_pairs = {}
@@ -132,6 +140,7 @@ def compare_files(directory_name):
       for m in metric.asymmetric_metrics:
         # perform logic for comparing doc1 and doc2
         d = metric.asymmetric_metrics[m].distance(doc1, doc2)
+
         if d == -1:
           # Ignore books with no words in common.
           print "Using metric ", m, ":", d
@@ -143,12 +152,22 @@ def compare_files(directory_name):
             d = d / new_words_avg
           else:
             d = d / new_words_max
+          if display_graph:
+            new_words_values[new_words_value_index] = d
+            new_words_value_index += 1
         elif m == 'New Occurrences':
           # Normalize
           if normalize_by_avg:
             d = d / new_occurrences_avg
           else:
             d = d / new_occurrences_max
+          if display_graph:
+            new_occurrences_values[new_occurrences_value_index] = d
+            new_occurrences_value_index += 1
+        elif m == 'Tversky index':
+          if display_graph:
+            tversky_values[tversky_value_index] = d
+            tversky_value_index += 1
         print "Using metric ", m, ":", d
         if d < low_scores[m]:
           low_scores[m] = d
@@ -180,6 +199,13 @@ def compare_files(directory_name):
   print "combined metric"
   print "Low:  {0} ({1})".format(low_scores['combined metric'], low_pairs['combined metric'])
   print "High: {0} ({1})\n".format(high_scores['combined metric'], high_pairs['combined metric'])
+
+  print "Graphing results."
+  plt.plot(tversky_values, 'r') 
+  plt.plot(new_words_values, 'g')
+  plt.plot(new_occurrences_values, 'b')
+  plt.legend(['Tversky', 'New Words', 'New Occurrences'])
+  plt.show()
 
 if __name__ == "__main__":
   default_filepath = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])
