@@ -1,8 +1,7 @@
 import math
 import os
 import sys
-from textdoc import TextDoc
-import metric
+from textcompare import TextDoc, metric
 import matplotlib.pyplot as plt
 
 normalize_by_avg = False
@@ -207,7 +206,7 @@ def compare_files(directory_name):
 
   if display_graph:
     print "Graphing results."
-    plt.plot(tversky_values, 'r') 
+    plt.plot(tversky_values, 'r')
     plt.plot(new_words_values, 'g')
     plt.plot(new_occurrences_values, 'b')
     plt.legend(['Tversky', 'New Words', 'New Occurrences'])

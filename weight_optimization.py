@@ -1,5 +1,5 @@
 # Given three asymmetric metrics (Tversky index, new words, and new
-# occurrences), optimize the 5 available weights: 
+# occurrences), optimize the 5 available weights:
 # w_tversky in [-1, 1]
 #   alpha in [0, 1] s.t. alpha != beta
 #   beta in [0, 1] s.t. alpha != beta
@@ -7,9 +7,8 @@
 # w_new_occurrences in [-1, 1]
 
 #import comparison_driver2
-import metric
 import os
-from textdoc import TextDoc
+from textcompare import TextDoc, metric
 
 # Whether we should use 2*average to normalize "new words" and "new occurrences" metrics.
 normalize_by_avg = False
@@ -85,7 +84,7 @@ if __name__ == '__main__':
           doc1 = documents[i]
           doc2 = documents[j]
           alpha_beta_to_tversky_scores[(alpha, beta)][(doc1.get_title(), doc2.get_title())] = metric.asymmetric_metrics['Tversky index'].distance(doc1, doc2)
-  
+
   print "Checkpoint 2"
   metric_to_scores = {}
   max_scores = {'New Words': float('-inf'), 'New Occurrences': float('-inf')}

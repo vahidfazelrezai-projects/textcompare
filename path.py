@@ -26,10 +26,18 @@ def order_asymmetric2(graph):
         ids = [id for id in ids if id != cur_id]
     return [nodes[id][0] for id in order]
 
+def order_asymmetric3(graph):
+    ids = graph['ids']
+    nodes = graph['nodes']
+    edges = graph['edges']
+    ids.sort(key=lambda id: sum([edges[key] for key in edges.keys() if key[1] == id]))
+    return [nodes[id][0] for id in ids]
+
 if __name__ == '__main__':
-    metric_name = 'Tversky index'
+    metric_name = 'New Words'
     filepath = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])
     textdocs, metric = compare.initialize(filepath)
     graph = compare.get_graph(textdocs, metric, metric_name)
     print order_asymmetric1(graph)
     print order_asymmetric2(graph)
+    print order_asymmetric3(graph)
