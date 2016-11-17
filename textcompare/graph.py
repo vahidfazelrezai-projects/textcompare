@@ -11,7 +11,7 @@ class Graph:
         for doc in textdocs:
             num_words = len(doc.get_frequencies().keys())
             self.ids.append(id_counter)
-            self.nodes[id_counter] = (doc.get_title(), num_words)
+            self.nodes[id_counter] = doc.get_title()
             id_map[doc] = id_counter
             id_counter += 1
 
@@ -33,10 +33,10 @@ class Graph:
         return self.edges
 
 
-def make_graph(directory_path = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])):
+def make_graph(directory_path = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER']), metric_name = 'New Words'):
     textdocs = load_directory(directory_path)
     metrics = generate_metrics(textdocs)
-    graph = Graph(textdocs, metrics['New Words'])
+    graph = Graph(textdocs, metrics[metric_name])
     return graph
 
 
