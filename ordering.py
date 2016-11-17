@@ -112,7 +112,7 @@ def path2(graph, start_id, end_id):
 
 # path3: shortest overall distance path with Dijkstra using max distance cutoff
 def path3(graph, start_id, end_id):
-    PERCENTILE = 0.7
+    PERCENTILE = 0.5
 
     ids = set(graph.get_ids())
     nodes = graph.get_nodes()
@@ -166,7 +166,7 @@ if __name__ == '__main__':
 
     ## Get list of names and ids
     # ids = order1(graph)
-    ids = path3(graph, 1, 19)
+    ids = path1(graph, 54, 19)
 
     ### Calculate distances
     distances = []

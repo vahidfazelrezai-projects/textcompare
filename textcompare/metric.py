@@ -23,8 +23,8 @@ class Metric:
         words1 = doc1.get_frequencies()
         words2 = doc2.get_frequencies()
         common_words = set(words1.keys()) & set(words2.keys())
-        if len(common_words) == 0:
-            return -1
+        # if len(common_words) == 0:
+        #     return -1
         for word in common_words:
             num = float(self.num_fn(words1[word], words2[word]))
             den = float(self.den_fn(words1[word], words2[word]))
