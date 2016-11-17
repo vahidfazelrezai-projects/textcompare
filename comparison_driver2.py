@@ -6,7 +6,7 @@ import metric
 import matplotlib.pyplot as plt
 
 normalize_by_avg = False
-display_graph = True
+display_graph = False
 
 def print_vocabulary_sizes(directory_name):
   textdocs = []
@@ -130,20 +130,23 @@ def compare_files(directory_name):
         continue
       doc1 = textdocs[i]
       doc2 = textdocs[j]
-      print "Comparing {0} and {1}".format(doc1.title, doc2.title)
+      if not display_graph:
+        print "Comparing {0} and {1}".format(doc1.title, doc2.title)
       common_words = set(doc1.get_frequencies().keys()) & set(doc2.get_frequencies().keys())
       f1 = doc1.get_frequencies()
       f2 = doc2.get_frequencies()
-      print "Listing common words and their frequencies (the order of frequencies is the same as the order the book titles were listed)"
-      for word in common_words:
-        print "Word: '{0}'\tFrequencies: {1}, {2}".format(word, f1[word], f2[word])
+      if not display_graph:
+        print "Listing common words and their frequencies (the order of frequencies is the same as the order the book titles were listed)"
+        for word in common_words:
+          print "Word: '{0}'\tFrequencies: {1}, {2}".format(word, f1[word], f2[word])
       for m in metric.asymmetric_metrics:
         # perform logic for comparing doc1 and doc2
         d = metric.asymmetric_metrics[m].distance(doc1, doc2)
 
         if d == -1:
           # Ignore books with no words in common.
-          print "Using metric ", m, ":", d
+          if not display_graph:
+            print "Using metric ", m, ":", d
           continue
 
         if m == 'New Words':
@@ -168,7 +171,8 @@ def compare_files(directory_name):
           if display_graph:
             tversky_values[tversky_value_index] = d
             tversky_value_index += 1
-        print "Using metric ", m, ":", d
+        if not display_graph:
+          print "Using metric ", m, ":", d
         if d < low_scores[m]:
           low_scores[m] = d
           low_pairs[m] = "{0} and {1}".format(doc1.title, doc2.title)
@@ -189,8 +193,9 @@ def compare_files(directory_name):
           high_scores['combined metric'] = combined_score
           high_pairs['combined metric'] = "{0} and {1}".format(doc1.title, doc2.title)
 
-      print "Using metric combined metric ", combined_score
-      print "--------------------------------------------------------------------------------\n"
+      if not display_graph:
+        print "Using metric combined metric ", combined_score
+        print "--------------------------------------------------------------------------------\n"
   print "Total Results Per Metric:"
   for m in metric.asymmetric_metrics:
     print m
@@ -200,12 +205,13 @@ def compare_files(directory_name):
   print "Low:  {0} ({1})".format(low_scores['combined metric'], low_pairs['combined metric'])
   print "High: {0} ({1})\n".format(high_scores['combined metric'], high_pairs['combined metric'])
 
-  print "Graphing results."
-  plt.plot(tversky_values, 'r') 
-  plt.plot(new_words_values, 'g')
-  plt.plot(new_occurrences_values, 'b')
-  plt.legend(['Tversky', 'New Words', 'New Occurrences'])
-  plt.show()
+  if display_graph:
+    print "Graphing results."
+    plt.plot(tversky_values, 'r') 
+    plt.plot(new_words_values, 'g')
+    plt.plot(new_occurrences_values, 'b')
+    plt.legend(['Tversky', 'New Words', 'New Occurrences'])
+    plt.show()
 
 if __name__ == "__main__":
   default_filepath = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])
