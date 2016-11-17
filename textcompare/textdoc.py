@@ -1,3 +1,5 @@
+import os
+
 # A class representing a book file that has been read.
 # The stored state are the title, author, isbn, and a map from word to
 # frequency.
@@ -32,7 +34,7 @@ class TextDoc:
           self.frequencies[w] += 1
         else:
           self.frequencies[w] = 1
-    doc.close()      
+    doc.close()
 
   def get_frequencies(self):
     return self.frequencies
@@ -46,25 +48,11 @@ class TextDoc:
   def get_isbn(self):
     return self.isbn
 
-# Test
-#t = TextDoc("./data/books/Brown Bear, Brown Bear, What Do You See.txt")
-#print t.frequencies
-#print t.get_author()
-#print t.get_title()
 
-#t1 = TextDoc("./data/books/Make Way for Ducklings.txt")
-#t2 = TextDoc("./data/books/The Story of Ferdinand.txt")
-#print t1.frequencies
-#print t2.frequencies
-#total = 0.0
-#m1 = 0.0
-#for term in t1.frequencies:
-#  m1 += t1.frequencies[term]**2
-#  if term in t2.frequencies:
-#    total += t1.frequencies[term] * t2.frequencies[term]
-#m2 = 0.0
-#for term in t2.frequencies:
-#  m2 += t2.frequencies[term]**2
-#m1 = m1**.5
-#m2 = m2**.5
-#print total/(m1*m2)
+def load_directory(directory_path):
+  textdocs = []
+  for filename in os.listdir(directory_path):
+    if filename == ".DS_Store":
+      continue
+    textdocs.append(TextDoc(os.path.join(directory_path, filename)))
+  return textdocs
