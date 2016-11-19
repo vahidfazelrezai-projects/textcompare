@@ -23,8 +23,8 @@ class Metric:
         words1 = doc1.get_frequencies()
         words2 = doc2.get_frequencies()
         common_words = set(words1.keys()) & set(words2.keys())
-        if len(common_words) == 0:
-            return -1
+        # if len(common_words) == 0:
+        #     return -1
         for word in common_words:
             num = float(self.num_fn(words1[word], words2[word]))
             den = float(self.den_fn(words1[word], words2[word]))
@@ -110,7 +110,39 @@ def num_new_occurrences_fn(d, words1, words2, weight_fn):
 def default_weight_fn(word):
   return 1
 
-# Map of names to metric instances
+def get_idf_map(textdocs):
+  m = {}
+  N = float(len(textdocs))
+  for doc in textdocs:
+    for word in doc.get_frequencies():
+      if word in m:
+        m[word] += 1
+      else:
+        m[word] = 1
+  idf_map = {}
+  # Using log base 2 for now
+  for word in m:
+    idf_map[word] = 1 + math.log(N / m[word], 2)
+  return idf_map
+
+def get_ittf_map(textdocs):
+  m = {}
+  for doc in textdocs:
+    frequencies = doc.get_frequencies()
+    for word in frequencies:
+      if word in m:
+        m[word] += frequencies[word]
+      else:
+        m[word] = frequencies[word]
+  total_words = 0.0
+  for word in m:
+    total_words += m[word]
+  ittf_map = {}
+  for word in m:
+    ittf_map[word] = 1 + math.log(total_words / m[word], 2)
+  return ittf_map
+
+# for backwards compatibility
 metrics = {
     'Canberra': Metric(diff_fn, sum_fn, identity_fn, default_weight_fn),
     'Sorenson': Metric(diff_fn, unit_fn, divide_sum_fn, default_weight_fn),
@@ -125,3 +157,26 @@ asymmetric_metrics = {
   'New Words': Metric(unit_fn, unit_fn, num_new_words_fn, default_weight_fn),
   'New Occurrences': Metric(freq2_fn, unit_fn, num_new_occurrences_fn, default_weight_fn),
 }
+
+def generate_metrics(textdocs):
+  idf_map = get_idf_map(textdocs)
+  ittf_map = get_ittf_map(textdocs)
+  def idf_weight_fn(word):
+    return idf_map[word]
+  def ittf_weight_fn(word):
+    return ittf_map[word]
+  metrics = {
+    'Canberra': Metric(diff_fn, sum_fn, identity_fn, default_weight_fn),
+    'Sorenson': Metric(diff_fn, unit_fn, divide_sum_fn, default_weight_fn),
+    'Minkowski2': Metric(diff_squared_fn, unit_fn, sqrt_fn, default_weight_fn),
+    'Jaccard': Metric(unit_fn, unit_fn, jaccard_mod_fn, default_weight_fn),
+    'TF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, default_weight_fn),
+    'Sublinear TF': Metric(log_mult_fn, unit_fn, divide_by_log_magnitudes_fn, default_weight_fn),
+    'Tversky index': Metric(unit_fn, unit_fn, tversky_divide_fn, default_weight_fn),
+    'New Words': Metric(unit_fn, unit_fn, num_new_words_fn, default_weight_fn),
+    'New Occurrences': Metric(freq2_fn, unit_fn, num_new_occurrences_fn, default_weight_fn),
+    'TF-IDF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, idf_weight_fn),
+    'Sublinear TF-IDF': Metric(log_mult_fn, unit_fn, divide_by_log_magnitudes_fn, idf_weight_fn),
+    'TF-ITTF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, ittf_weight_fn)
+  }
+  return metrics

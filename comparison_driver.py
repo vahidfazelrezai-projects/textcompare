@@ -1,8 +1,7 @@
 import math
 import os
 import sys
-from textdoc import TextDoc
-import metric
+from textcompare import TextDoc, metric
 
 # Given a list of TextDoc objects, returns a map from
 # word -> log(number of docs / number of docs containing word)
