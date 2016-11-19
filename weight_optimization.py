@@ -19,7 +19,7 @@ training_set_2_loc = "/Users/{0}/Dropbox (MIT)/children's books/training_set2/".
 training_set_3_loc = "/Users/{0}/Dropbox (MIT)/children's books/training_set3/".format(os.environ['USER'])
 
 # Use this to determine which training set we'll use
-training_set_num = 3
+training_set_num = 1
 
 if training_set_num == 1:
   training_set_loc = training_set_1_loc
@@ -146,7 +146,9 @@ if __name__ == '__main__':
                 title2 = documents[j].get_title()
                 score = w_tversky * alpha_beta_to_tversky_scores[(alpha, beta)][(title1, title2)] + w_new_words*metric_to_scores['New Words'][(title1, title2)] + w_new_occurrences*metric_to_scores['New Occurrences'][(title1, title2)]
                 #scores[(alpha, beta, w_tversky, w_new_words, w_new_occurrences, title1, title2)] = score
-                if training_set_num == 1:
+
+                # Negative numbers denote the old metrics I used to train the data. Using the modified Tversky index, use the positive values.
+                if training_set_num == -1:
                   if title1 == "Hug" and title2 == "Wolstencroft the Bear":
                     total_score += score
                   elif title1 == "Corduroy" and title2 == "Wolstencroft the Bear":
@@ -158,6 +160,23 @@ if __name__ == '__main__':
                   elif title1 == "Brown Bear Brown Bear, What Do You See?" and title2 == "Wolstencroft the Bear":
                     total_score += score
                     #max_hug_to_wolstencroft = "alpha: {0}, beta: {1}, tversky: {2}, new words: {3}, new occurrences: {4}".format(alpha, beta, w_tversky, w_new_words, w_new_occurrences)
+                elif training_set_num == 1:
+                  if title1 == "Hug" and title2 == "Faster! Faster!":
+                    total_score -= score
+                  elif title1 == "Faster! Faster!" and title2 == "Brown Bear Brown Bear, What Do You See?":
+                    total_score -= score
+                  elif title1 == "Brown Bear Brown Bear, What Do You See?" and title2 == "Corduroy":
+                    total_score -= score
+                  elif title1 == "Corduroy" and title2 == "Wolstencroft the Bear":
+                    total_score -= score
+                  elif title1 == "Wolstencroft the Bear" and title2 == "Hug":
+                    total_score += score
+                  elif title1 == "Hug" and title2 == "Wolstencroft the Bear":
+                    total_score += score
+                  elif title1 == "Hug" and title2 == "Corduroy":
+                    total_score += score
+                  elif title1 == "Corduroy" and title2 == "Hug":
+                    total_score += score
                 elif training_set_num == 2:
                   # Training set 2
                   if title1 == "If You Give A Moose A Muffin" and title2 == "If you Give A Mouse A Cookie":

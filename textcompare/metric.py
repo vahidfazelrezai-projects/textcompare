@@ -1,6 +1,6 @@
 import math
 
-tversky_alpha = 0.0
+tversky_alpha = 1.0
 tversky_beta = 0.1
 
 class Metric:
@@ -86,6 +86,12 @@ def tversky_divide_fn(d, words1, words2, weight_fn):
   s2 = set(words2.keys())
   return 1 - d/(d + tversky_alpha*len(s1 - s2) + tversky_beta*(len(s2 - s1)))
 
+def modified_tversky_divide_fn(d, words1, words2, weight_fn):
+  s1 = set(words1.keys())
+  s2 = set(words2.keys())
+  size_diff = max(len(words2) - len(words1), 0)
+  return 1 - (d + size_diff)/(d + size_diff + tversky_alpha*len(s1 - s2) + tversky_beta*((10 - len(s2 - s1))**2))
+
 # Number of new words that would need to be learned to read book2 after reading book1.
 def num_new_words_fn(d, words1, words2, weight_fn):
   s1 = set(words1.keys())
@@ -115,7 +121,7 @@ metrics = {
 }
 
 asymmetric_metrics = {
-  'Tversky index': Metric(unit_fn, unit_fn, tversky_divide_fn, default_weight_fn),
+  'Tversky index': Metric(unit_fn, unit_fn, modified_tversky_divide_fn, default_weight_fn),
   'New Words': Metric(unit_fn, unit_fn, num_new_words_fn, default_weight_fn),
   'New Occurrences': Metric(freq2_fn, unit_fn, num_new_occurrences_fn, default_weight_fn),
 }
