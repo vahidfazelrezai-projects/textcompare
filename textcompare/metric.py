@@ -1,6 +1,6 @@
 import math
 
-tversky_alpha = 1.0
+tversky_alpha = 0.0
 tversky_beta = 0.1
 
 class Metric:
@@ -82,21 +82,45 @@ def divide_by_log_magnitudes_fn(d, words1, words2, weight_fn):
   return math.acos(max(-1.0, min(x, 1.0))) # Min and max are for rounding errors, like evaluating 1.0 as 1.0000000000001, etc.
 
 def tversky_divide_fn(d, words1, words2, weight_fn):
+  if d == 0:
+    return 1.0
   s1 = set(words1.keys())
   s2 = set(words2.keys())
   return 1 - d/(d + tversky_alpha*len(s1 - s2) + tversky_beta*(len(s2 - s1)))
 
 def modified_tversky_divide_fn(d, words1, words2, weight_fn):
+  if d == 0:
+    return 1.0
   s1 = set(words1.keys())
   s2 = set(words2.keys())
   size_diff = max(len(words2) - len(words1), 0)
   return 1 - (d + size_diff)/(d + size_diff + tversky_alpha*len(s1 - s2) + tversky_beta*((10 - len(s2 - s1))**2))
+
+def scaled_tversky_divide_fn(d, words1, words2, weight_fn):
+  s1 = set(words1.keys())
+  s2 = set(words2.keys())
+  total_occurrences1 = sum([words1[word] for word in words1])
+  total_occurrences2 = sum([words2[word] for word in words2])
+  r1 = float(total_occurrences1)/len(s1)
+  r2 = float(total_occurrences2)/len(s2)
+  if d == 0:
+    return (max(1, r2 - r1))
+  return (max(1, r2 - r1)) * (1 - d/(d + tversky_alpha*len(s1 - s2) + tversky_beta*(len(s2 - s1))))
 
 # Number of new words that would need to be learned to read book2 after reading book1.
 def num_new_words_fn(d, words1, words2, weight_fn):
   s1 = set(words1.keys())
   s2 = set(words2.keys())
   return len(s2 - s1)
+
+def scaled_num_new_words_fn(d, words1, words2, weight_fn):
+  s1 = set(words1.keys())
+  s2 = set(words2.keys())
+  total_occurrences1 = sum([words1[word] for word in words1])
+  total_occurrences2 = sum([words2[word] for word in words2])
+  r1 = float(total_occurrences1)/len(s1)
+  r2 = float(total_occurrences2)/len(s2)
+  return max(1, r2 - r1) * len(s2 - s1)
 
 # Number of occurrences of new words when reading book2 after book1.
 # To be used with freq2_fn as numerator function.
@@ -153,8 +177,8 @@ metrics = {
 }
 
 asymmetric_metrics = {
-  'Tversky index': Metric(unit_fn, unit_fn, modified_tversky_divide_fn, default_weight_fn),
-  'New Words': Metric(unit_fn, unit_fn, num_new_words_fn, default_weight_fn),
+  'Tversky index': Metric(unit_fn, unit_fn, tversky_divide_fn, default_weight_fn),
+  'New Words': Metric(unit_fn, unit_fn, scaled_num_new_words_fn, default_weight_fn),
   'New Occurrences': Metric(freq2_fn, unit_fn, num_new_occurrences_fn, default_weight_fn),
 }
 
@@ -173,7 +197,7 @@ def generate_metrics(textdocs):
     'TF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, default_weight_fn),
     'Sublinear TF': Metric(log_mult_fn, unit_fn, divide_by_log_magnitudes_fn, default_weight_fn),
     'Tversky index': Metric(unit_fn, unit_fn, tversky_divide_fn, default_weight_fn),
-    'New Words': Metric(unit_fn, unit_fn, num_new_words_fn, default_weight_fn),
+    'New Words': Metric(unit_fn, unit_fn, scaled_num_new_words_fn, default_weight_fn),
     'New Occurrences': Metric(freq2_fn, unit_fn, num_new_occurrences_fn, default_weight_fn),
     'TF-IDF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, idf_weight_fn),
     'Sublinear TF-IDF': Metric(log_mult_fn, unit_fn, divide_by_log_magnitudes_fn, idf_weight_fn),

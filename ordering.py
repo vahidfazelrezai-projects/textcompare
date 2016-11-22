@@ -166,7 +166,7 @@ if __name__ == '__main__':
 
     ## Get list of names and ids
     # ids = order1(graph)
-    ids = path1(graph, 54, 19)
+    ids = path1(graph, 19, 54)
 
     ### Calculate distances
     distances = []
