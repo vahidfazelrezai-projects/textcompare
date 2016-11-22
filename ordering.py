@@ -64,12 +64,13 @@ def path1(graph, start_id, end_id):
     cur = start_id
     while cur != end_id:
         ids.remove(cur)
-        min_distance = edges[(cur, end_id)]
-        min_id = end_id
+        min_distance = float('inf')
+        min_id = None
         for id in ids:
-            if edges[(cur, id)] != -1 and edges[(cur, id)] < min_distance:
+            if (cur, id) in edges and edges[(cur, id)] != -1 and edges[(cur, id)] < min_distance:
                 min_id = id
                 min_distance = edges[(cur, id)]
+        if not min_id: return []
         path_ids.append(min_id)
         cur = min_id
     return path_ids
@@ -93,7 +94,7 @@ def path2(graph, start_id, end_id):
         ids.remove(cur)
 
         for id in ids:
-            if edges[(cur, id)] >= 0:
+            if (cur, id) in edges and edges[(cur, id)] >= 0:
                 alt = distance[cur] + edges[(cur, id)]
                 if alt < distance[id]:
                     distance[id] = alt
@@ -112,7 +113,7 @@ def path2(graph, start_id, end_id):
 
 # path3: shortest overall distance path with Dijkstra using max distance cutoff
 def path3(graph, start_id, end_id):
-    PERCENTILE = 0.5
+    PERCENTILE = 0.8
 
     ids = set(graph.get_ids())
     nodes = graph.get_nodes()
@@ -135,7 +136,7 @@ def path3(graph, start_id, end_id):
         ids.remove(cur)
 
         for id in ids:
-            if edges[(cur, id)] >= 0 and edges[(cur, id)] <= distance_cutoff:
+            if (cur, id) in edges and edges[(cur, id)] >= 0 and edges[(cur, id)] <= distance_cutoff:
                 alt = distance[cur] + edges[(cur, id)]
                 if alt < distance[id]:
                     distance[id] = alt
@@ -144,6 +145,7 @@ def path3(graph, start_id, end_id):
     path_ids = [end_id]
     cur = end_id
     while True:
+        if cur not in previous: return []
         cur = previous[cur]
         if cur == None:
             return []
@@ -158,7 +160,8 @@ def path3(graph, start_id, end_id):
 if __name__ == '__main__':
     ### Set up graph
     directory_path = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER'])
-    graph = make_graph(directory_path = directory_path, metric_name = 'New Words')
+    graph = make_graph(directory_path = directory_path, metric_name = 'Tversky index')
+    graph.prune_edges()
 
     ids = set(graph.get_ids())
     nodes = graph.get_nodes()
@@ -166,16 +169,28 @@ if __name__ == '__main__':
 
     ## Get list of names and ids
     # ids = order1(graph)
-    ids = path1(graph, 19, 54)
+    # ids = path1(graph, 1, 2)
+    # print len(ids)
+
+    ## Get all lengths
+    lengths = {}
+    f = open('lengths.txt', 'w')
+    for i in range(54):
+        for j in range(54):
+            lengths[(i,j)] = len(path3(graph, i+1, j+1))
+            f.write(str(lengths[(i,j)]) + str('\t'))
+        f.write('\n')
+    f.close()
+    print 'avg', float(sum(lengths.values()))/len(lengths.values())
 
     ### Calculate distances
-    distances = []
-    for i in range(len(ids) - 1):
-        distances.append(graph.get_edges()[(ids[i], ids[i+1])])
-    names = [nodes[id] for id in ids]
+    # distances = []
+    # for i in range(len(ids) - 1):
+    #     distances.append(graph.get_edges()[(ids[i], ids[i+1])])
+    # names = [nodes[id] for id in ids]
 
     ### Output results
-    print distances
-    print names
-    print ids
+    # print distances
+    # print names
+    # print ids
     # read(directory_path, names)
