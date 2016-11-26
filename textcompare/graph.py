@@ -32,6 +32,11 @@ class Graph:
     def get_edges(self):
         return self.edges
 
+    def prune_edges(self):
+        for edge_key in self.edges.keys():
+            if edge_key in self.edges and (edge_key[1], edge_key[0]) in self.edges:
+                if self.edges[edge_key] < self.edges[(edge_key[1], edge_key[0])]:
+                    self.edges.pop(edge_key)
 
 def make_graph(directory_path = "/Users/{0}/Dropbox (MIT)/children's books/books/".format(os.environ['USER']), metric_name = 'New Words'):
     textdocs = load_directory(directory_path)
