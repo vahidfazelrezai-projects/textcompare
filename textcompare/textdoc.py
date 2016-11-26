@@ -48,6 +48,16 @@ class TextDoc:
   def get_isbn(self):
     return self.isbn
 
+# A class that allows a TextDoc to be created from a set of words. Useful if
+# you need to create a TextDoc without reading from a file.
+class TextDocFromWordSet(TextDoc):
+  def __init__(self, word_set):
+    self.title = "N/A"
+    self.author = "N/A"
+    self.isbn = "N/A"
+    self.frequencies = {}
+    for word in word_set:
+      self.frequencies[word.lower()] = 1
 
 def load_directory(directory_path):
   textdocs = []

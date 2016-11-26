@@ -63,7 +63,7 @@ def divide_sum_fn(d, words1, words2, weight_fn):
     total = 0
     for word in common_words:
         total += words1[word] + words2[word]
-    return d / total
+    return d / total if total != 0 else float('inf')
 
 def sqrt_fn(d, words1, words2, weight_fn):
     return d**0.5
@@ -79,6 +79,11 @@ def divide_by_magnitudes_fn(d, words1, words2, weight_fn):
 
 def divide_by_log_magnitudes_fn(d, words1, words2, weight_fn):
   x = float(d) / ((reduce(lambda x,y: x + (weight_fn(y)*(1 + math.log(words1[y], 2)))**2, words1, 0)**.5) * (reduce(lambda x,y: x + (weight_fn(y)*(1 + math.log(words2[y], 2)))**2, words2, 0)**.5))
+  return math.acos(max(-1.0, min(x, 1.0))) # Min and max are for rounding errors, like evaluating 1.0 as 1.0000000000001, etc.
+
+# Note: ignores weight_fn. Treats all frequencies as if they are 1 or 0.
+def binary_divide_by_magnitudes_fn(d, words1, words2, weight_fn):
+  x = float(d) / ((len(words1)**.5) * (len(words2)**.5))
   return math.acos(max(-1.0, min(x, 1.0))) # Min and max are for rounding errors, like evaluating 1.0 as 1.0000000000001, etc.
 
 def tversky_divide_fn(d, words1, words2, weight_fn):
@@ -118,9 +123,11 @@ def scaled_num_new_words_fn(d, words1, words2, weight_fn):
   s2 = set(words2.keys())
   total_occurrences1 = sum([words1[word] for word in words1])
   total_occurrences2 = sum([words2[word] for word in words2])
-  r1 = float(total_occurrences1)/len(s1)
-  r2 = float(total_occurrences2)/len(s2)
-  return max(1, r2 - r1) * len(s2 - s1)
+  #r1 = float(total_occurrences1)/len(s1)
+  #r2 = float(total_occurrences2)/len(s2)
+  r1 = len(s1)
+  r2 = len(s2)
+  return max(1, r1 - r2) * len(s2 - s1)
 
 # Number of occurrences of new words when reading book2 after book1.
 # To be used with freq2_fn as numerator function.
@@ -174,12 +181,14 @@ metrics = {
     'Jaccard': Metric(unit_fn, unit_fn, jaccard_mod_fn, default_weight_fn),
     'TF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, default_weight_fn),
     'Sublinear TF': Metric(log_mult_fn, unit_fn, divide_by_log_magnitudes_fn, default_weight_fn),
+    'Binary TF' : Metric(unit_fn, unit_fn, binary_divide_by_magnitudes_fn, default_weight_fn),
 }
 
 asymmetric_metrics = {
   'Tversky index': Metric(unit_fn, unit_fn, tversky_divide_fn, default_weight_fn),
   'New Words': Metric(unit_fn, unit_fn, scaled_num_new_words_fn, default_weight_fn),
   'New Occurrences': Metric(freq2_fn, unit_fn, num_new_occurrences_fn, default_weight_fn),
+  'Original New Words': Metric(unit_fn, unit_fn, num_new_words_fn, default_weight_fn),
 }
 
 def generate_metrics(textdocs):
@@ -201,6 +210,8 @@ def generate_metrics(textdocs):
     'New Occurrences': Metric(freq2_fn, unit_fn, num_new_occurrences_fn, default_weight_fn),
     'TF-IDF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, idf_weight_fn),
     'Sublinear TF-IDF': Metric(log_mult_fn, unit_fn, divide_by_log_magnitudes_fn, idf_weight_fn),
-    'TF-ITTF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, ittf_weight_fn)
+    'TF-ITTF': Metric(mult_fn, unit_fn, divide_by_magnitudes_fn, ittf_weight_fn),
+    'Binary TF' : Metric(unit_fn, unit_fn, binary_divide_by_magnitudes_fn, default_weight_fn),
+    'Original New Words': Metric(unit_fn, unit_fn, num_new_words_fn, default_weight_fn),
   }
   return metrics
