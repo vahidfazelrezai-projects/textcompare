@@ -127,7 +127,7 @@ def scaled_num_new_words_fn(d, words1, words2, weight_fn):
   #r2 = float(total_occurrences2)/len(s2)
   r1 = len(s1)
   r2 = len(s2)
-  return max(1, r1 - r2) * len(s2 - s1)
+  return max(1, r1 - r2) * max(1, len(s2 - s1))
 
 # Number of occurrences of new words when reading book2 after book1.
 # To be used with freq2_fn as numerator function.
@@ -195,9 +195,9 @@ def generate_metrics(textdocs):
   idf_map = get_idf_map(textdocs)
   ittf_map = get_ittf_map(textdocs)
   def idf_weight_fn(word):
-    return idf_map[word]
+    return idf_map[word] if word in idf_map else 1
   def ittf_weight_fn(word):
-    return ittf_map[word]
+    return ittf_map[word] if word in ittf_map else 1
   metrics = {
     'Canberra': Metric(diff_fn, sum_fn, identity_fn, default_weight_fn),
     'Sorenson': Metric(diff_fn, unit_fn, divide_sum_fn, default_weight_fn),
