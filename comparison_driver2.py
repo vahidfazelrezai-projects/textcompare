@@ -1,12 +1,13 @@
 import math
 import os
 import sys
-from textcompare import TextDoc, metric
+from textcompare import TextDoc, metric, textdoc
 import matplotlib.pyplot as plt
 
 normalize_by_avg = False
 display_graph = False
 
+# Print the vocabulary size of all books in the given directory.
 def print_vocabulary_sizes(directory_name):
   textdocs = []
   for filename in os.listdir(directory_name):
@@ -51,12 +52,10 @@ def get_ittf_map(textdocs):
     ittf_map[word] = 1 + math.log(total_words / m[word], 2)
   return ittf_map
 
+# Given a directory, compare all pairs of books in that directory using all the
+# metrics in metric.metrics, plus TF-IDF, Sublinear TF-IDF, and TF-ITTF.
 def compare_files(directory_name):
-  textdocs = []
-  for filename in os.listdir(directory_name):
-    if filename == ".DS_Store":
-      continue
-    textdocs.append(TextDoc(os.path.join(directory_name, filename)))
+  textdocs = textdoc.load_directory(directory_name)
   idf_map = get_idf_map(textdocs)
   ittf_map = get_ittf_map(textdocs)
   def idf_weight_fn(word):
@@ -178,6 +177,8 @@ def compare_files(directory_name):
         if d > high_scores[m]:
           high_scores[m] = d
           high_pairs[m] = "{0} and {1}".format(doc1.title, doc2.title)
+
+      # Deal with the combined metric.
       d1 = metric.asymmetric_metrics['Tversky index'].distance(doc1, doc2)
       d2 = metric.asymmetric_metrics['New Words'].distance(doc1, doc2)/new_words_max
       d3 = metric.asymmetric_metrics['New Occurrences'].distance(doc1, doc2)/new_occurrences_max
@@ -204,6 +205,7 @@ def compare_files(directory_name):
   print "Low:  {0} ({1})".format(low_scores['combined metric'], low_pairs['combined metric'])
   print "High: {0} ({1})\n".format(high_scores['combined metric'], high_pairs['combined metric'])
 
+  # Graph results, if applicable.
   if display_graph:
     print "Graphing results."
     plt.plot(tversky_values, 'r')

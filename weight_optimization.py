@@ -91,7 +91,9 @@ if __name__ == '__main__':
   avg_scores = {'New Words': 0.0, 'New Occurrences': 0.0}
   num_nonnegative_scores = {'New Words': 0, 'New Occurrences': 0}
   # compute scores for the rest of the metrics
-  for m in metric.asymmetric_metrics:
+  metrics = metric.asymmetric_metrics
+  del metrics['Original New Words'] # For compatibility
+  for m in metrics:
     if m == 'Tversky index':
       continue
     if m not in metric_to_scores:

@@ -38,6 +38,8 @@ def get_ittf_map(textdocs):
     ittf_map[word] = 1 + math.log(total_words / m[word], 2)
   return ittf_map
 
+# Given a directory, compare all pairs of books in that directory using all the
+# metrics in metric.metrics, plus TF-IDF, Sublinear TF-IDF, and TF-ITTF.
 def compare_files(directory_name):
   textdocs = []
   for filename in os.listdir(directory_name):
