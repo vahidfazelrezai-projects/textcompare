@@ -14,41 +14,41 @@ def order1(graph):
     ids = graph.get_ids()
     nodes = graph.get_nodes()
     edges = graph.get_edges()
-    ids.sort(key=lambda id: sum([edges[key] for key in edges.keys() if key[0] == id]))
+    ids.sort(key=lambda id: -sum([edges[key] for key in edges.keys() if key[0] == id]))
     return ids
 
-# order2: greedily add nodes one by one using outgoing edges
+# order2: sort by sum of all incoming edges
 def order2(graph):
+    ids = graph.get_ids()
+    nodes = graph.get_nodes()
+    edges = graph.get_edges()
+    ids.sort(key=lambda id: -sum([edges[key] for key in edges.keys() if key[1] == id]))
+    return ids
+
+# order3: sort by sum of all outgoing edges recursively
+def order3(graph):
     ids = graph.get_ids()
     n = len(ids)
     nodes = graph.get_nodes()
     edges = graph.get_edges()
     order = []
     for i in range(n):
-        scores = [(id, sum([edges[key] for key in edges.keys() if (key[0] == id and key[1] in ids)])) for id in ids]
+        scores = [(id, -sum([edges[key] for key in edges.keys() if (key[0] == id and key[1] in ids)])) for id in ids]
         scores.sort(key=lambda x: x[1])
         cur_id = scores[0][0]
         order.append(cur_id)
         ids = [id for id in ids if id != cur_id]
     return order
 
-# order3: sort by sum of all incoming edges
-def order3(graph):
-    ids = graph.get_ids()
-    nodes = graph.get_nodes()
-    edges = graph.get_edges()
-    ids.sort(key=lambda id: sum([edges[key] for key in edges.keys() if key[1] == id]))
-    return ids
-
-# order4: greedily add nodes one by one using incoming edges
-def order2(graph):
+# order4: sort by sum of all incoming edges recursively
+def order4(graph):
     ids = graph.get_ids()
     n = len(ids)
     nodes = graph.get_nodes()
     edges = graph.get_edges()
     order = []
     for i in range(n):
-        scores = [(id, sum([edges[key] for key in edges.keys() if (key[0] == id and key[1] in ids)])) for id in ids]
+        scores = [(id, -sum([edges[key] for key in edges.keys() if (key[1] == id and key[1] in ids)])) for id in ids]
         scores.sort(key=lambda x: x[1])
         cur_id = scores[0][0]
         order.append(cur_id)
@@ -168,29 +168,21 @@ if __name__ == '__main__':
     edges = graph.get_edges()
 
     ## Get list of names and ids
-    # ids = order1(graph)
-    # ids = path1(graph, 1, 2)
-    # print len(ids)
+    ids = order1(graph)
+    names1 = list(reversed([nodes[id] for id in ids]))
+    print names1
 
-    ## Get all lengths
-    lengths = {}
-    f = open('lengths.txt', 'w')
-    for i in range(54):
-        for j in range(54):
-            lengths[(i,j)] = len(path3(graph, i+1, j+1))
-            f.write(str(lengths[(i,j)]) + str('\t'))
-        f.write('\n')
-    f.close()
-    print 'avg', float(sum(lengths.values()))/len(lengths.values())
+    ids = order2(graph)
+    names2 = list(reversed([nodes[id] for id in ids]))
+    print names2
 
-    ### Calculate distances
-    # distances = []
-    # for i in range(len(ids) - 1):
-    #     distances.append(graph.get_edges()[(ids[i], ids[i+1])])
-    # names = [nodes[id] for id in ids]
+    ids = order3(graph)
+    names3 = list(reversed([nodes[id] for id in ids]))
+    print names3
 
-    ### Output results
-    # print distances
-    # print names
-    # print ids
-    # read(directory_path, names)
+    ids = order4(graph)
+    names4 = list(reversed([nodes[id] for id in ids]))
+    print names4
+
+    print sum([1 if names2[i] == names4[i] else 0 for i in range(len(names1))])
+    print sum([1 if names1[i] == names3[i] else 0 for i in range(len(names1))])
