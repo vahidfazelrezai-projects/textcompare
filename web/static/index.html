@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+  <title>TextCompare</title>
+
+  <style type="text/css">
+    html, body {
+      margin-left: 20px;
+      padding: 0;
+    }
+  </style>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <script type="text/javascript">
+  $(document).ready(function () {
+    var names;
+    var checkboxes = [];
+
+    var update = function () {
+      ids = checkboxes.map(function (checkbox) {
+        return [checkbox.is(':checked'), checkbox.attr('value')];
+      }).filter(function (item) {
+        return item[0];
+      }).map(function (item) {
+        return item[1];
+      }).join(',');
+      if (ids.length == 0) {
+        $('#suggestions').text("No books read yet!");
+      } else {
+        $.get('suggest?read=' + ids, function (data) {
+          $('#suggestions').text(data);
+        });
+      }
+    }
+
+    $.get('/names', function (data) {
+      names = data;
+      console.log(names);
+      $.each(names, function (index) {
+        d = $("<div>");
+        c = $("<input />").attr('type', 'checkbox').attr('value', index).text(names[index]);
+        checkboxes[index] = c;
+        d.append(c).change(update);
+        d.append($("<span>").text(names[index]));
+        $('#checks').append(d);
+      });
+    });
+  });
+  </script>
+</head>
+<body>
+  <div style="display: inline-block; width: 40%;">
+    <h3>Read books</h3>
+    <div id="checks">
+    </div>
+  </div>
+  <div style="display: inline-block; width: 40%; vertical-align: top;">
+    <h3>Next Book</h3>
+    <div id="suggestions"></div>
+  </div>
+  </body>
+</html>
